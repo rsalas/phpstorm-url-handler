@@ -12,24 +12,23 @@
 function urldecode() { : "${*//+/ }"; echo -e "${_//%/\\x}"; }
 
 arg=$(urldecode "${1}")
-pattern=".*file(:\/\/|\=)(.*)(:|&line=)(.*)"
 
-# Get the file path.
-file=$(echo "${arg}" | sed -r "s/${pattern}/\2/")
-
-# Get the line number.
-line=$(echo "${arg}" | sed -r "s/${pattern}/\4/")
-
-# Check if phpstorm|pstorm command exist.
-if type phpstorm > /dev/null; then
-    /usr/bin/env phpstorm --line "${line}" "${file}"
-elif type pstorm > /dev/null; then
-    /usr/bin/env pstorm --line "${line}" "${file}"
+# Get the file path and line number using bash regex
+if [[ "${arg}" =~ file(://|=)([^:&]+) ]]; then
+    file="${BASH_REMATCH[2]}"
 fi
 
-if type wmctrl > /dev/null; then
-    filename=$(basename "$file")
-    /usr/bin/env wmctrl -i -a $(wmctrl -l | grep "${filename}" | tail -n 1 | cut -d ' ' -f1)
+if [[ "${arg}" =~ (:|&line=)([0-9]+) ]]; then
+    line="${BASH_REMATCH[2]}"
+fi
+
+# Check if phpstorm|pstorm command exist.
+if type phpstorm > /dev/null 2>&1; then
+    if [ -z "${1}" ]; then
+        /usr/bin/env phpstorm
+    else
+        /usr/bin/env phpstorm --line "${line}" "${file}"
+    fi
 fi
 
 exit 0
