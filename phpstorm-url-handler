@@ -8,6 +8,7 @@
 #
 # @license GPL
 # @author Stefan Auditor <stefan@auditor.email>
+# @updated Rodolfo Salas <rsalas@usalinux.org>
 
 function urldecode() { : "${*//+/ }"; echo -e "${_//%/\\x}"; }
 
